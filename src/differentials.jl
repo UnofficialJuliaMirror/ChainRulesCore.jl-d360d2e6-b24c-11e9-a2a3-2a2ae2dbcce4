@@ -225,8 +225,17 @@ macro thunk(body)
     return :(Thunk($(esc(func))))
 end
 
+"""
+    unthunk(x)
+
+`unthunk` removes 1 layer of thunking from an `AbstractThunk`,
+and on all other types is the `identity` function.
+"""
+unthunk(x) = x
+unthunk(x::Thunk) = x()
+
 # have to define this here after `@thunk` and `Thunk` is defined
-Base.conj(x::AbstractThunk) = @thunk(conj(extern(x)))
+Base.conj(x::AbstractThunk) = @thunk(conj(unthunk(x)))
 
 
 (x::Thunk)() = x.f()
@@ -254,6 +263,7 @@ end
 
 (x::InplaceableThunk)() = x.val()
 @inline extern(x::InplaceableThunk) = extern(x.val)
+unthunk(x::InplaceableThunk) = unthunk(x.val)
 
 function Base.show(io::IO, x::InplaceableThunk)
     println(io, "InplaceableThunk($(repr(x.val)), $(repr(x.add!)))")
