@@ -142,6 +142,14 @@ function Base.:+(a::Composite{Primal, NamedTuple{an}}, b::Composite{Primal, Name
     end
 end
 
+function Base.:+(a::Primal, b::Composite{Primal, <:NamedTuple})::Primal where {Primal}
+
+    backing =  #TODO: factor out the +(::Composite,::Composite) above and call it here.
+
+    return _construct(Primal, backing)  # should use _directly_construct
+end
+
+
 # this should not need to be generated, # TODO test that
 function Base.:+(a::Composite{Primal, <:Tuple}, b::Composite{Primal, <:Tuple}) where Primal
     # TODO: should we even allow it on different lengths?
@@ -157,4 +165,63 @@ function Base.:+(a::Composite{Primal, <:Tuple}, b::Composite{Primal, <:Tuple}) w
     end
 
     return Composite{Primal, typeof(backing)}(backing)
+end
+
+
+# this should not need to be generated, # TODO test that
+function Base.:+(a::Primal, b::Composite{Primal, <:Tuple})::Primal where {Primal}
+    @assert Primal <: Tuple  # only Composites for Tuples have Tuple backing
+
+    # TODO: should we even allow it on different lengths?
+    short, long =  length(a) < length(b) ? (a.backing, b.backing) : (b.backing, a.backing)
+    return ntuple(length(long)) do ii
+        long_val = getfield(long, ii)
+        if ii <= length(short)
+            short_val = getfield(short, ii)
+            return short_val + long_val
+        else
+            return long_val
+        end
+    end
+end
+
+Base.:+(b::Composite{Primal}, a::Primal) where Primal =  a + b
+
+
+"""
+    _construct(::Type{T}, fields::NamedTuple{L})
+
+Constructs an object of type `T`, with the given fields.
+Fields must be correct in name and type, and `T` must have a default constructor
+"""
+function _construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
+    # Tested and varified that that this avoids a ton of allocations
+    if length(L) !== fieldcount(T)
+        # if length is equal but names differ then we will catch that below anyway.
+        throw(ArgumentError("Unmatched fields. Type: $(fieldnames(T)),  namedtuple: $L"))
+    end
+
+    if @generated
+        if !isempty(setdiff(L, fieldnames())
+            ArgumentError("Extra fields in namedtuple (has$L), not ")
+        end
+        vals = (:(getproperty(fields, $(QuoteNode(fname)))) for fname in fieldnames(T))
+        return :(T($(vals...)))
+    else
+        return T((getproperty(fields, fname) for fname in fieldnames(T))...)
+    end
+end
+
+
+
+"""
+    _directly_construct(::Type{T}, fields::NamedTuple{L})
+
+Directly constructs an object of type `T`, with the given fields.
+**Bypassing all inner constructors.**
+"""
+function _directly_construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
+    #TODO based on
+    #https://github.com/JuliaIO/BSON.jl/blob/a58c88a14e07d0beed8f56edb79e5cbea7078e00/src/extensions.jl#L107
+    error("no implemented")
 end
