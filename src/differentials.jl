@@ -301,7 +301,7 @@ It should not be passed in by user.
 struct Composite{Primal, T} <: AbstractDifferential
     backing::T
 end
-
+# Note: If T is a Tuple, then Primal is also a Tuple (but potentially a different one, as it doesn't contain differentials)
 
 function Composite{Primal}(;kwargs...) where Primal
     backing = (; kwargs...)
@@ -328,8 +328,10 @@ Base.convert(::Type{<:Tuple}, comp::Composite{<:Any, <:Tuple}) = comp.backing
 Base.getindex(comp::Composite, idx) = getindex(comp.backing)
 Base.getproperty(comp::Composite, idx) = getproperty(comp.backing, idx)
 Base.propertynames(comp::Composite) = propertynames(comp.backing)
+
 Base.iterate(comp::Compositem, args...) = iterate(comp.backing, args...)
 Base.length(comp::Composite) = length(comp.backing)
+Base.eltype(::Type{Composite{<:Any, T}}) where T = eltype(T)
 
 map(f, comp::Composite{Primal, <:Tuple}) where Primal = Composite{Primal}(map(f, comp.backing))
 function map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
@@ -339,6 +341,17 @@ function map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
 end
 
 Base.conj(comp::Composite{Primal}) = map(conj, comp)
+
+Base.==(a::Composite{Primal}, a::Composite{Primal}) where Primal = a.backing == b.backing
+Base.==(a::Composite, a::Composite) = false  #different Primals
+Base.==(comp::Composite, x) = comp.backing == x  # for comparing to Tuples/NamedTuple
+Base.==(x, comp::Composite) = comp == x
+
+extern(comp::Composite) = map(extern, comp)
+# TODO: should this actually try and make a Primal? seems like it might be too likely to fail
+#extern(comp::Composite{Primal, <:Tuple}) where Primal = Primal(map(extern, comp).backing...)
+#extern(comp::Composite{Primal, <:NamedTuple}) where Primal = Primal(; map(extern, comp).backing...)
+
 
 #==============================================================================#
 

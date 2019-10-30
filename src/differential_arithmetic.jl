@@ -140,7 +140,6 @@ function Base.:+(a::Composite{Primal, NamedTuple{an}}, b::Composite{Primal, Name
         end
         NamedTuple{names,types}(map(n->getfield(sym_in(n, bn) ? b : a, n), names))
     end
-    end
 end
 
 # this should not need to be generated, # TODO test that
