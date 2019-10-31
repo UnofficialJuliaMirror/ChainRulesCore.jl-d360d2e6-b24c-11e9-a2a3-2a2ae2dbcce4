@@ -9,7 +9,9 @@ export Wirtinger, Zero, One, DoesNotExist, Thunk, InplaceableThunk
 export NO_FIELDS
 
 include("differentials.jl")
+include("composite_core.jl")
 include("differential_arithmetic.jl")
+
 include("operations.jl")
 include("rules.jl")
 include("rule_definition_tools.jl")
