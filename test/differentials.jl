@@ -83,6 +83,12 @@
         end
     end
 
+    @testset "Composite" begin
+
+        @test Ref(6.5) == Ref(5.0) + Composite{Base.RefValue{Floa64}}(x=1.5)
+    end
+
+
     @testset "No ambiguities in $f" for f in (+, *)
         # We don't use `Test.detect_ambiguities` as we are only interested in
         # the +, and * operations. We also would catch any that are unrelated

@@ -317,25 +317,26 @@ function Base.show(io::IO, comp::Composite{Primal}) where Primal
     show(io, Primal)
     print(io, "}")
     # allow Tuple or NamedTuple `show` to do the rendering of brackets etc
-    show(io, comp.backing)
+    show(io, backing(comp))
 end
 
 #TODO think about this, for if we are missing fields
 #Base.convert(::Type{Primal}, comp::Composite{Primal})
-Base.convert(::Type{<:NamedTuple}, comp::Composite{<:Any, <:NamedTuple}) = comp.backing
-Base.convert(::Type{<:Tuple}, comp::Composite{<:Any, <:Tuple}) = comp.backing
+Base.convert(::Type{<:NamedTuple}, comp::Composite{<:Any, <:NamedTuple}) = backing(comp)
+Base.convert(::Type{<:Tuple}, comp::Composite{<:Any, <:Tuple}) = backing(comp)
 
-Base.getindex(comp::Composite, idx) = getindex(comp.backing)
-Base.getproperty(comp::Composite, idx) = getproperty(comp.backing, idx)
-Base.propertynames(comp::Composite) = propertynames(comp.backing)
+Base.getindex(comp::Composite, idx) = getindex(backing(comp))
+Base.getproperty(comp::Composite, idx::Int) = getproperty(backing(comp), idx)  # for Tuple
+Base.getproperty(comp::Composite, idx::Symbol) = getproperty(backing(comp), idx)
+Base.propertynames(comp::Composite) = propertynames(backing(comp))
 
-Base.iterate(comp::Composite, args...) = iterate(comp.backing, args...)
-Base.length(comp::Composite) = length(comp.backing)
+Base.iterate(comp::Composite, args...) = iterate(backing(comp), args...)
+Base.length(comp::Composite) = length(backing(comp))
 Base.eltype(::Type{Composite{<:Any, T}}) where T = eltype(T)
 
 Base.map(f, comp::Composite{Primal, <:Tuple}) where Primal = Composite{Primal}(map(f, comp.backing))
 function Base.map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
-    vals = map(f, Tuple(comp.backing))
+    vals = map(f, Tuple(backing(comp)))
     named_vals = NamedTuple{L, typeof(vals)}(vals)
     return Composite{Primal}(named_vals)
 end

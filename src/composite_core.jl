@@ -8,7 +8,7 @@ This is kind of the opposite of `construct` for structs.
 """
 backing(x::Tuple) = x
 backing(x::NamedTuple) = x
-backing(x::Composite) = x.backing
+backing(x::Composite) = getfield(x, :backing)
 
 function backing(x::T)::NamedTuple where T
     nfields = fieldcount(T)
