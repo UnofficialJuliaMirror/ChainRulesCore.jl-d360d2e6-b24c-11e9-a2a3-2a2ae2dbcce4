@@ -93,15 +93,15 @@ end
 # We intentionally do not define, `Base.*(::Composite, ::Composite)` as that is not meaningful
 # In general one doesn't have to represent multiplications of 2 differentials
 # Only of a differential and a scaling factor (generally `Real`)
-Base.*(s::Any, comp::Composite) = map(x->s*x, comp)
-Base.*(comp::Composite, s::Any) = s*comp
+Base.:*(s::Any, comp::Composite) = map(x->s*x, comp)
+Base.:*(comp::Composite, s::Any) = s*comp
 
-function Base.+(a::Composite{Primal}, b::Composite{Primal}) where Primal
+function Base.:+(a::Composite{Primal}, b::Composite{Primal}) where Primal
     return Composite{Primal}(elementwise_add(a.backing, b.backing))
 end
-function Base.+(a::Primal, b::Composite{Primal}) where Primal
+function Base.:+(a::Primal, b::Composite{Primal}) where Primal
     return construct(Primal, elementwise_add(backing(a), backing(b)))
 end
-function Base.+(a::::Composite{Primal}, b::Primal) where Primal
+function Base.:+(a::Composite{Primal}, b::Primal) where Primal
     return construct(Primal, elementwise_add(backing(a), backing(b)))
 end

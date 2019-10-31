@@ -312,7 +312,7 @@ function Composite{Primal}(args...) where Primal
     return Composite{Primal, typeof(args)}(args)
 end
 
-function Base.show(io::IO, comp::Composite{Primal})
+function Base.show(io::IO, comp::Composite{Primal}) where Primal
     print(io, "Composite{")
     show(io, Primal)
     print(io, "}")
@@ -329,28 +329,27 @@ Base.getindex(comp::Composite, idx) = getindex(comp.backing)
 Base.getproperty(comp::Composite, idx) = getproperty(comp.backing, idx)
 Base.propertynames(comp::Composite) = propertynames(comp.backing)
 
-Base.iterate(comp::Compositem, args...) = iterate(comp.backing, args...)
+Base.iterate(comp::Composite, args...) = iterate(comp.backing, args...)
 Base.length(comp::Composite) = length(comp.backing)
 Base.eltype(::Type{Composite{<:Any, T}}) where T = eltype(T)
 
-map(f, comp::Composite{Primal, <:Tuple}) where Primal = Composite{Primal}(map(f, comp.backing))
-function map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
+Base.map(f, comp::Composite{Primal, <:Tuple}) where Primal = Composite{Primal}(map(f, comp.backing))
+function Base.map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
     vals = map(f, Tuple(comp.backing))
     named_vals = NamedTuple{L, typeof(vals)}(vals)
     return Composite{Primal}(named_vals)
 end
 
-Base.conj(comp::Composite{Primal}) = map(conj, comp)
+Base.conj(comp::Composite) = map(conj, comp)
 
-Base.==(a::Composite{Primal}, a::Composite{Primal}) where Primal = a.backing == b.backing
-Base.==(a::Composite, a::Composite) = false  #different Primals
-Base.==(comp::Composite, x) = comp.backing == x  # for comparing to Tuples/NamedTuple
-Base.==(x, comp::Composite) = comp == x
+#=
+Base.:==(a::Composite{Primal}, b::Composite{Primal}) where Primal = a.backing == b.backing
+Base.:==(a::Composite, a::Composite) = false  #different Primals
+Base.:==(comp::Composite, x) = comp.backing == x  # for comparing to Tuples/NamedTuple
+Base.:==(x, comp::Composite) = comp == x
+=#
 
-extern(comp::Composite) = map(extern, comp)
-# TODO: should this actually try and make a Primal? seems like it might be too likely to fail
-#extern(comp::Composite{Primal, <:Tuple}) where Primal = Primal(map(extern, comp).backing...)
-#extern(comp::Composite{Primal, <:NamedTuple}) where Primal = Primal(; map(extern, comp).backing...)
+extern(comp::Composite) = backing(map(extern, comp))  # gives a NamedTuple or Tuple
 
 
 #==============================================================================#
