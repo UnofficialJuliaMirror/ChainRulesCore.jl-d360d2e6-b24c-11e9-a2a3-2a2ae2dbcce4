@@ -7,7 +7,8 @@ subtypes, as we know the full set that might be encountered.
 Thus we can avoid any ambiguities.
 
 Notice:
-    The precidence goes: (:Wirtinger, :Zero, :DoesNotExist, :One, :AbstractThunk, :Any)
+    The precidence goes:
+    `Wirtinger, Zero, DoesNotExist, One, AbstractThunk, Composite, Any`
     Thus each of the @eval loops creating definitions of + and *
     defines the combination this type with all types of  lower precidence.
     This means each eval loops is 1 item smaller than the previous.
