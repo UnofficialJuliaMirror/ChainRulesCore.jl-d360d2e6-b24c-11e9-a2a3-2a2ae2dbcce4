@@ -84,8 +84,8 @@
     end
 
     @testset "Composite" begin
-
-        @test Ref(6.5) == Ref(5.0) + Composite{Base.RefValue{Floa64}}(x=1.5)
+        @test Ref(6.5) == Ref(5.0) + Composite{Base.RefValue{Float64}}(x=1.5)
+        @test Ref(6.5) == Composite{Base.RefValue{Float64}}(x=1.5)) + Ref(5.0)
     end
 
 
