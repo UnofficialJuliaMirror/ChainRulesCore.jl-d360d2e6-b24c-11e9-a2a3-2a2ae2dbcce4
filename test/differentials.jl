@@ -1,3 +1,10 @@
+
+# For testing Composite
+struct Foo
+    x
+    y::Float64
+end
+
 @testset "Differentials" begin
     @testset "Wirtinger" begin
         w = Wirtinger(1+1im, 2+2im)
@@ -84,8 +91,33 @@
     end
 
     @testset "Composite" begin
-        @test Ref(6.5) == Ref(5.0) + Composite{Base.RefValue{Float64}}(x=1.5)
-        @test Ref(6.5) == Composite{Base.RefValue{Float64}}(x=1.5)) + Ref(5.0)
+        @testset "+ with other composites" begin
+            @test Composite{Foo}(x=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(x=4.0)
+            @test Composite{Foo}(y=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(y=1.5, x=2.5)
+            @test Composite{Foo}(y=1.5, x=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(y=1.5, x=4.0)
+
+            @test (
+                Composite{Tuple{Float64, Float64}}(1.0, 2.0) +
+                Composite{Tuple{Float64, Float64}}(1.0, 1.0)
+            ) == Composite{Tuple{Float64, Float64}}(2.0, 3.0)
+        end
+
+        @testset "+ with Primals" begin
+
+            @test ((1.0, 2.0) + Composite{Tuple{Float64, Float64}}(1.0, 1.0)) == (2.0, 3.0)
+            @test (Composite{Tuple{Float64, Float64}}(1.0, 1.0)) + (1.0, 2.0) == (2.0, 3.0)
+
+            # TODO put tests with primals of Foo and NamedTuples here
+
+        end
+
+        # TODO Scaling tests
+
+        @testset "show" begin
+            @test repr(Composite{Foo}(x=1,)) == "Composite{Foo}(x = 1,)"
+            @test repr(Composite{Tuple{Int,Int}}(1, 2)) == "Composite{Tuple{Int64,Int64}}(1, 2)"
+        end
+
     end
 
 

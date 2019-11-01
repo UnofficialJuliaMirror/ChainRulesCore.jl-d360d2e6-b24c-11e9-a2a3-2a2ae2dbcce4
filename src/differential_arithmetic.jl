@@ -97,8 +97,10 @@ end
 Base.:*(s::Any, comp::Composite) = map(x->s*x, comp)
 Base.:*(comp::Composite, s::Any) = s*comp
 
+
 function Base.:+(a::Composite{Primal}, b::Composite{Primal}) where Primal
-    return Composite{Primal}(elementwise_add(a.backing, b.backing))
+    data = elementwise_add(backing(a), backing(b))
+    return Composite{Primal, typeof(data)}(data)
 end
 function Base.:+(a::Primal, b::Composite{Primal}) where Primal
     return construct(Primal, elementwise_add(backing(a), backing(b)))

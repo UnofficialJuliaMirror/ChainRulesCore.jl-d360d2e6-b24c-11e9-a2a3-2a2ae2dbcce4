@@ -27,7 +27,7 @@ end
 
 
 """
-    construct(::Type{T}, fields::NamedTuple{L})
+    construct(::Type{T}, fields::[NamedTuple|Tuple])
 
 Constructs an object of type `T`, with the given fields.
 Fields must be correct in name and type, and `T` must have a default constructor
@@ -47,7 +47,7 @@ function construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
     end
 end
 
-
+construct(::Type{T}, fields::T) where T = fields  # for Tuple
 
 """
     directly_construct(::Type{T}, fields::NamedTuple{L})
