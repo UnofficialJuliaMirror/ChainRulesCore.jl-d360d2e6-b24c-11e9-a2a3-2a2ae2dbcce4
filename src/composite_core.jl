@@ -49,6 +49,7 @@ end
 
 construct(::Type{T}, fields::T) where T = fields  # for Tuple
 
+#==
 """
     directly_construct(::Type{T}, fields::NamedTuple{L})
 
@@ -61,6 +62,7 @@ function directly_construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
     # We need to use this rather than `construct` so that closures work.
     error("no implemented")
 end
+==#
 
 
 ########################################################################################

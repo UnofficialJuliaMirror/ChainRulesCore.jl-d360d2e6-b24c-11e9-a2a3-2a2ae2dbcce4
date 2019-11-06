@@ -92,10 +92,12 @@ end
 
     @testset "Composite" begin
         @testset "+ with other composites" begin
+            # Structs
             @test Composite{Foo}(x=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(x=4.0)
             @test Composite{Foo}(y=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(y=1.5, x=2.5)
             @test Composite{Foo}(y=1.5, x=1.5) + Composite{Foo}(x=2.5) == Composite{Foo}(y=1.5, x=4.0)
 
+            # Tuples
             @test (
                 Composite{Tuple{Float64, Float64}}(1.0, 2.0) +
                 Composite{Tuple{Float64, Float64}}(1.0, 1.0)
@@ -103,12 +105,13 @@ end
         end
 
         @testset "+ with Primals" begin
+            # Structs
+            @test Foo(3.5, 1.5) + Composite{Foo}(x=2.5) == Foo(6.0, 1.5)
+            @test Composite{Foo}(x=2.5) + Foo(3.5, 1.5) == Foo(6.0, 1.5)
 
+            # Tuples
             @test ((1.0, 2.0) + Composite{Tuple{Float64, Float64}}(1.0, 1.0)) == (2.0, 3.0)
             @test (Composite{Tuple{Float64, Float64}}(1.0, 1.0)) + (1.0, 2.0) == (2.0, 3.0)
-
-            # TODO put tests with primals of Foo and NamedTuples here
-
         end
 
         # TODO Scaling tests
@@ -117,7 +120,6 @@ end
             @test repr(Composite{Foo}(x=1,)) == "Composite{Foo}(x = 1,)"
             @test repr(Composite{Tuple{Int,Int}}(1, 2)) == "Composite{Tuple{Int64,Int64}}(1, 2)"
         end
-
     end
 
 
@@ -130,7 +132,7 @@ end
         ambig_methods = [
             (m1, m2) for m1 in methods(f), m2 in methods(f) if Base.isambiguous(m1, m2)
         ]
-        @test_broken isempty(ambig_methods)  # We have added some one purpose. TODO update this
+        @test_broken isempty(ambig_methods)  # We have added some on purpose. TODO update this
     end
 
 
