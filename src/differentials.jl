@@ -303,8 +303,8 @@ struct Composite{Primal, T} <: AbstractDifferential
 end
 # Note: If T is a Tuple, then Primal is also a Tuple (but potentially a different one, as it doesn't contain differentials)
 
-function Composite{Primal}(;kwargs...) where Primal
-    backing = (; kwargs...)
+function Composite{Primal}(; kwargs...) where Primal
+    backing = (; kwargs...)  # construct as NamedTuple
     return Composite{Primal, typeof(backing)}(backing)
 end
 
@@ -334,21 +334,17 @@ Base.iterate(comp::Composite, args...) = iterate(backing(comp), args...)
 Base.length(comp::Composite) = length(backing(comp))
 Base.eltype(::Type{Composite{<:Any, T}}) where T = eltype(T)
 
-Base.map(f, comp::Composite{Primal, <:Tuple}) where Primal = Composite{Primal}(map(f, comp.backing))
+function Base.map(f, comp::Composite{Primal, <:Tuple}) where Primal
+    vals::Tuple = map(f, backing(comp))
+    return Composite{Primal, typeof(vals)}(vals)
+end
 function Base.map(f, comp::Composite{Primal, <:NamedTuple{L}}) where{Primal, L}
     vals = map(f, Tuple(backing(comp)))
     named_vals = NamedTuple{L, typeof(vals)}(vals)
-    return Composite{Primal}(named_vals)
+    return Composite{Primal, typeof(named_vals)}(named_vals)
 end
 
 Base.conj(comp::Composite) = map(conj, comp)
-
-#=
-Base.:==(a::Composite{Primal}, b::Composite{Primal}) where Primal = a.backing == b.backing
-Base.:==(a::Composite, a::Composite) = false  #different Primals
-Base.:==(comp::Composite, x) = comp.backing == x  # for comparing to Tuples/NamedTuple
-Base.:==(x, comp::Composite) = comp == x
-=#
 
 extern(comp::Composite) = backing(map(extern, comp))  # gives a NamedTuple or Tuple
 

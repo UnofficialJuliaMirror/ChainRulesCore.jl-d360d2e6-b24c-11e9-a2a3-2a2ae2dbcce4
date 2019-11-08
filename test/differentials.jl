@@ -114,7 +114,18 @@ end
             @test (Composite{Tuple{Float64, Float64}}(1.0, 1.0)) + (1.0, 2.0) == (2.0, 3.0)
         end
 
-        # TODO Scaling tests
+        @testset "Scaling" begin
+            @test (
+                2 *  Composite{Foo}(y=1.5, x=2.5)
+                == Composite{Foo}(y=3.0, x=5.0)
+                == Composite{Foo}(y=1.5, x=2.5) * 2
+            )
+            @test (
+                2 * Composite{Tuple{Float64, Float64}}(2.0, 4.0)
+                == Composite{Tuple{Float64, Float64}}(4.0, 8.0)
+                == Composite{Tuple{Float64, Float64}}(2.0, 4.0) * 2
+            )
+        end
 
         @testset "show" begin
             @test repr(Composite{Foo}(x=1,)) == "Composite{Foo}(x = 1,)"

@@ -49,26 +49,14 @@ end
 
 construct(::Type{T}, fields::T) where T = fields  # for Tuple
 
-#==
-"""
-    directly_construct(::Type{T}, fields::NamedTuple{L})
-
-Directly constructs an object of type `T`, with the given fields.
-**Bypassing all inner constructors.**
-"""
-function directly_construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
-    #TODO based on
-    #https://github.com/JuliaIO/BSON.jl/blob/a58c88a14e07d0beed8f56edb79e5cbea7078e00/src/extensions.jl#L107
-    # We need to use this rather than `construct` so that closures work.
-    error("no implemented")
-end
-==#
 
 
 ########################################################################################
 elementwise_add(a::Tuple, b::Tuple) = map(+, a, b)
 
 function elementwise_add(a::NamedTuple{an}, b::NamedTuple{bn}) where {an, bn}
+    # Rule of Composite addition: any fields not present are implict hard Zeros
+
     # Base on the `merge(:;NamedTuple, ::NamedTuple)` code from Base.
     # https://github.com/JuliaLang/julia/blob/592748adb25301a45bd6edef3ac0a93eed069852/base/namedtuple.jl#L220-L231
     if @generated
@@ -113,5 +101,3 @@ function elementwise_add(a::NamedTuple{an}, b::NamedTuple{bn}) where {an, bn}
         return NamedTuple{names,types}(vals)
     end
 end
-
-elementwise_add((y=25,),  (x=2, y=4))
