@@ -57,7 +57,7 @@ function construct(::Type{T}, fields::NamedTuple{L}) where {T, L}
     # Tested and varified that that this avoids a ton of allocations
     if length(L) !== fieldcount(T)
         # if length is equal but names differ then we will catch that below anyway.
-        throw(ArgumentError("Unmatched fields. Type: $(fieldnames(T)),  namedtuple: $L"))
+        throw(ArgumentError("Unmatched fields. Type: $(fieldnames(T)),  NamedTuple: $L"))
     end
 
     if @generated
