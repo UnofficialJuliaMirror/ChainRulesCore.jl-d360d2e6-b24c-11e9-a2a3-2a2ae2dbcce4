@@ -7,7 +7,7 @@ subtypes, as we know the full set that might be encountered.
 Thus we can avoid any ambiguities.
 
 Notice:
-    The precidence goes:
+    The precedence goes:
     `Wirtinger, Zero, DoesNotExist, One, AbstractThunk, Composite, Any`
     Thus each of the @eval loops creating definitions of + and *
     defines the combination this type with all types of  lower precidence.
