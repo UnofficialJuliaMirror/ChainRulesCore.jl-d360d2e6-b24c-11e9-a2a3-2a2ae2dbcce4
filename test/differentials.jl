@@ -5,6 +5,16 @@ struct Foo
     y::Float64
 end
 
+# For testing Composite: it is an invarient of the type that x2 = 2x
+# so simple addition can not be defined
+struct StructWithInvariant
+    x
+    x2
+
+    StructWithInvariant(x) = new(x, 2x)
+end
+
+
 @testset "Differentials" begin
     @testset "Wirtinger" begin
         w = Wirtinger(1+1im, 2+2im)
@@ -112,6 +122,22 @@ end
             # Tuples
             @test ((1.0, 2.0) + Composite{Tuple{Float64, Float64}}(1.0, 1.0)) == (2.0, 3.0)
             @test (Composite{Tuple{Float64, Float64}}(1.0, 1.0)) + (1.0, 2.0) == (2.0, 3.0)
+        end
+
+        @testset "+ with Primals, with inner constructor" begin
+            value = StructWithInvariant(10.0)
+            diff = Composite{StructWithInvariant}(x=2.0, x2=6.0)
+            @test_throws ChainRulesCore.PrimalAdditionFailedException (value + diff)
+            @test_throws ChainRulesCore.PrimalAdditionFailedException (diff + value)
+
+            # Now we define constuction for ChainRulesCore.jl's purposes:
+            # It is going to determine the root quanity of the invarient
+            function ChainRulesCore.construct(::Type{StructWithInvariant}, nt::NamedTuple)
+                x = (nt.x + nt.x2/2)/2
+                return StructWithInvariant(x)
+            end
+            @test value + diff == StructWithInvariant(12.5)
+            @test diff + value == StructWithInvariant(12.5)
         end
 
         @testset "Scaling" begin

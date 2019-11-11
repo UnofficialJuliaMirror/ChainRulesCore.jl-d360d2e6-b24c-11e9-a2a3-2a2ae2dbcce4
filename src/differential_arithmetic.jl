@@ -102,9 +102,11 @@ function Base.:+(a::Composite{Primal}, b::Composite{Primal}) where Primal
     data = elementwise_add(backing(a), backing(b))
     return Composite{Primal, typeof(data)}(data)
 end
-function Base.:+(a::Primal, b::Composite{Primal}) where Primal
-    return construct(Primal, elementwise_add(backing(a), backing(b)))
+function Base.:+(a::Primal, d::Composite{Primal}) where Primal
+    try
+        return construct(Primal, elementwise_add(backing(a), backing(d)))
+    catch err
+        throw(PrimalAdditionFailedException(a, d, err))
+    end
 end
-function Base.:+(a::Composite{Primal}, b::Primal) where Primal
-    return construct(Primal, elementwise_add(backing(a), backing(b)))
-end
+Base.:+(a::Composite{Primal}, b::Primal) where Primal = b + a

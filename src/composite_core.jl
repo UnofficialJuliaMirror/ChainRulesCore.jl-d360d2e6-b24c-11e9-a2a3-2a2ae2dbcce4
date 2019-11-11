@@ -1,3 +1,24 @@
+struct PrimalAdditionFailedException{P} <: Exception
+    primal::P
+    differential::Composite{P}
+    original::Exception
+end
+
+function Base.showerror(io::IO, err::PrimalAdditionFailedException{P}) where {P}
+    println(io, "Could not construct $P after addition")
+    print("This probably means no default constructor (")
+    print(P, "(", join(propertynames(err.differential), ", "), ")")
+    println(") is defined.\n Either define a default constructor, or")
+    print("overload `ChainRulesCore.construct(::Type{$P}, ")
+    println(" ::$(typeof(err.differential)))`,")
+    println("or overload `Base.:+(::$P, ::$(typeof(err.differential)))`.")
+    println("Original Exception:")
+    print(io, err.original)
+    println()
+end
+
+
+
 """
     backing(x)
 
