@@ -294,7 +294,7 @@ fields of the primal type; and each should be a differential type matching to th
 type of that field.
 Fields of the Primal that are not present in the Composite are treated as `Zero`.
 
-`T` is an implementation detail representing the backing datastructure.
+`T` is an implementation detail representing the backing data structure.
 For Tuple it will be a Tuple, and for everything else it will be a `NamedTuple`.
 It should not be passed in by user.
 """
