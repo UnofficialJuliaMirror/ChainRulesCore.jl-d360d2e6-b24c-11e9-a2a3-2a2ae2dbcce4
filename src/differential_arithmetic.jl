@@ -95,7 +95,7 @@ end
 # In general one doesn't have to represent multiplications of 2 differentials
 # Only of a differential and a scaling factor (generally `Real`)
 Base.:*(s::Any, comp::Composite) = map(x->s*x, comp)
-Base.:*(comp::Composite, s::Any) = s*comp
+Base.:*(comp::Composite, s::Any) = map(x->x*s, comp)
 
 
 function Base.:+(a::Composite{Primal}, b::Composite{Primal}) where Primal
